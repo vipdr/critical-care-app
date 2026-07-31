@@ -13,6 +13,8 @@
         body {
             font-family: 'Cairo', sans-serif;
             background-color: #f1f5f9;
+            direction: rtl !important;
+            text-align: right !important;
         }
         
         .sidebar {
@@ -47,17 +49,21 @@
             padding: 2cm;
             box-shadow: 0 10px 25px rgba(0,0,0,0.1);
             outline: none;
+            direction: rtl !important;
+            text-align: right !important;
         }
 
         .editor-container table {
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 1rem;
+            direction: rtl !important;
         }
 
         .editor-container th, .editor-container td {
             border: 1px solid #94a3b8;
             padding: 8px;
+            text-align: right !important;
         }
 
         .editor-container th {
@@ -76,6 +82,8 @@
             display: flex;
             align-items: center;
             margin-bottom: 8px;
+            direction: rtl !important;
+            text-align: right !important;
         }
 
         @media (max-width: 768px) {
@@ -113,6 +121,7 @@
             body {
                 background-color: white;
                 display: block;
+                direction: rtl !important;
             }
             .sidebar, .mobile-header {
                 display: none !important;
@@ -126,12 +135,22 @@
             .editor-container {
                 box-shadow: none;
                 margin: 0;
-                padding: 0;
+                padding: 1.5cm;
                 max-width: 100%;
                 min-height: auto;
+                direction: rtl !important;
+                text-align: right !important;
+            }
+            table {
+                width: 100% !important;
+                direction: rtl !important;
+            }
+            th, td {
+                text-align: right !important;
             }
             h2, h3 {
                 page-break-after: avoid;
+                text-align: right !important;
             }
             table, .avoid-break {
                 page-break-inside: avoid;
@@ -209,9 +228,8 @@
                 </li>
             </div>
             
-<div class="p-4 bg-slate-900 border-t border-slate-700 text-center text-xs text-slate-400">
-    تصميم وتطوير: <span class="text-blue-400 font-bold">د/مجدي محمد سعد</span>
-</div>
+            <div class="p-4 bg-slate-900 border-t border-slate-700 text-center text-xs text-slate-400">
+                تصميم وتطوير: <span class="text-blue-400 font-bold">د. مجدي محمد سعد</span>
             </div>
         </aside>
 
@@ -253,7 +271,7 @@
                     return;
                 }
                 
-                const header = `<html dir="rtl"><head><meta charset="utf-8"><style>body{font-family:Arial,sans-serif;} table{width:100%;border-collapse:collapse;} th,td{border:1px solid #000;padding:8px;text-align:right;} th{background:#eee;}</style></head><body>`;
+                const header = `<html dir="rtl"><head><meta charset="utf-8"><style>body{font-family:Arial,sans-serif;direction:rtl;text-align:right;} table{width:100%;border-collapse:collapse;direction:rtl;} th,td{border:1px solid #000;padding:8px;text-align:right;} th{background:#eee;}</style></head><body>`;
                 const footer = `</body></html>`;
                 
                 let htmlContent = this.editor.innerHTML;
@@ -336,7 +354,7 @@
                 else if (type === 'ER') {
                     sectionHTML = `
                         <h2 class="text-xl font-bold text-blue-800 mt-6 mb-3 border-b-2 border-blue-200 pb-2 avoid-break" contenteditable="false"><i class="fas fa-truck-fast"></i> التقييم السريع: قسم الطوارئ</h2>
-                        <div class="grid grid-cols-2 gap-2 mb-4 p-4 border border-gray-300 rounded bg-slate-50 text-base avoid-break">
+                        <div class="grid grid-cols-1 gap-2 mb-4 p-4 border border-gray-300 rounded bg-slate-50 text-base avoid-break">
                             <label class="checkbox-group"><input type="checkbox"> الغرفة مفعلة وتعمل بكفاءة</label>
                             <label class="checkbox-group"><input type="checkbox"> نظام رعايات مصر مفعل (Username & Password)</label>
                             <label class="checkbox-group"><input type="checkbox"> توافر الإنترنت والكمبيوتر بالطوارئ</label>
@@ -351,7 +369,7 @@
                 else if (type === 'ICU') {
                     sectionHTML = `
                         <h2 class="text-xl font-bold text-blue-800 mt-6 mb-3 border-b-2 border-blue-200 pb-2 avoid-break" contenteditable="false"><i class="fas fa-heart-pulse"></i> التقييم السريع: قسم العناية المركزة</h2>
-                        <div class="grid grid-cols-2 gap-2 mb-4 p-4 border border-gray-300 rounded bg-red-50 text-base avoid-break">
+                        <div class="grid grid-cols-1 gap-2 mb-4 p-4 border border-gray-300 rounded bg-red-50 text-base avoid-break">
                             <label class="checkbox-group"><input type="checkbox"> القوى البشرية (أطباء/تمريض) متواجدة</label>
                             <label class="checkbox-group"><input type="checkbox"> الأجهزة الحيوية تعمل بكفاءة (مونيتور/فينت)</label>
                             <label class="checkbox-group"><input type="checkbox"> الأدوية الحرجة متوفرة بالقسم</label>
@@ -391,7 +409,7 @@
                 else if (type === 'OR') {
                     sectionHTML = `
                         <h2 class="text-xl font-bold text-blue-800 mt-6 mb-3 border-b-2 border-blue-200 pb-2 avoid-break" contenteditable="false"><i class="fas fa-scalpel"></i> التقييم السريع: قسم العمليات</h2>
-                        <div class="grid grid-cols-2 gap-2 mb-4 p-4 border border-gray-300 rounded bg-green-50 text-base avoid-break">
+                        <div class="grid grid-cols-1 gap-2 mb-4 p-4 border border-gray-300 rounded bg-green-50 text-base avoid-break">
                             <label class="checkbox-group"><input type="checkbox"> غرف العمليات تعمل ومجهزة</label>
                             <label class="checkbox-group"><input type="checkbox"> جهاز التخدير يعمل ومُصان</label>
                             <label class="checkbox-group"><input type="checkbox"> أجهزة الشفط المركزية/المتنقلة تعمل</label>
