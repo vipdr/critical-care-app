@@ -559,6 +559,14 @@
                 this.editor.lastElementChild.scrollIntoView({ behavior: 'smooth', block: 'end' });
             }
         };
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(reg => console.log('تم تفعيل وضع الأوفلاين بنجاح'))
+                    .catch(err => console.log('فشل تفعيل الأوفلاين: ', err));
+            });
+        }
     </script>
 </body>
 </html>
