@@ -21,7 +21,7 @@
             color: #f8fafc;
             height: 100vh;
             overflow-y: auto;
-            transition: all 0.3s;
+            transition: all 0.3s ease-in-out;
         }
 
         .menu-item {
@@ -41,8 +41,8 @@
         .editor-container {
             background-color: white;
             width: 100%;
-            max-width: 21cm; /* A4 Width */
-            min-height: 29.7cm; /* A4 Height */
+            max-width: 21cm;
+            min-height: 29.7cm;
             margin: 20px auto;
             padding: 2cm;
             box-shadow: 0 10px 25px rgba(0,0,0,0.1);
@@ -78,12 +78,48 @@
             margin-bottom: 8px;
         }
 
+        /* ----- تعديلات الموبايل ----- */
+        @media (max-width: 768px) {
+            .sidebar {
+                position: fixed;
+                top: 0;
+                right: -300px; /* مخفية خارج الشاشة */
+                z-index: 50;
+                box-shadow: -5px 0 15px rgba(0,0,0,0.5);
+            }
+            .sidebar.open {
+                right: 0; /* تظهر عند الضغط */
+            }
+            .sidebar-overlay {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100vw;
+                height: 100vh;
+                background: rgba(0,0,0,0.5);
+                z-index: 40;
+            }
+            .sidebar-overlay.open {
+                display: block;
+            }
+            .editor-container {
+                padding: 15px; /* مساحة أقل في الموبايل */
+                margin: 10px auto;
+                min-height: auto;
+                overflow-x: auto; /* السماح بالتمرير للجداول العريضة */
+            }
+            .editor-container th, .editor-container td {
+                font-size: 14px; /* تصغير الخط قليلاً بالجداول */
+            }
+        }
+
         @media print {
             body {
                 background-color: white;
                 display: block;
             }
-            .sidebar {
+            .sidebar, .mobile-header {
                 display: none !important;
             }
             .main-content {
@@ -108,75 +144,94 @@
         }
     </style>
 </head>
-<body class="flex h-screen overflow-hidden">
+<body class="flex flex-col md:flex-row h-screen overflow-hidden bg-slate-200">
 
-    <!-- القائمة الجانبية -->
-    <aside class="sidebar flex-shrink-0 flex flex-col z-20 shadow-xl">
-        <div class="p-4 bg-slate-900 border-b border-slate-700 flex items-center gap-3">
-            <i class="fas fa-truck-medical text-2xl text-blue-400"></i>
-            <h1 class="font-bold text-lg leading-tight">إدارة الرعاية الحرجة<br><span class="text-xs text-slate-400">نموذج المرور الميداني</span></h1>
+    <!-- شريط علوي للموبايل فقط -->
+    <div class="mobile-header md:hidden bg-slate-900 text-white p-4 flex justify-between items-center shadow-md z-10 w-full flex-shrink-0">
+        <div class="flex items-center gap-3">
+            <i class="fas fa-truck-medical text-xl text-blue-400"></i>
+            <h1 class="font-bold text-lg">نظام الرعاية الحرجة</h1>
         </div>
+        <button onclick="app.toggleSidebar()" class="text-2xl focus:outline-none">
+            <i class="fas fa-bars"></i>
+        </button>
+    </div>
 
-        <div class="flex-1 overflow-y-auto py-2">
-            
-            <div class="px-4 py-2 mt-2 mb-1 text-xs font-bold text-slate-500 uppercase tracking-wider">الإجراءات الأساسية</div>
-            <li onclick="window.print()" class="menu-item text-blue-300 hover:text-blue-200 bg-blue-900/30">
-                <i class="fas fa-print w-6 text-center"></i> طباعة / حفظ PDF
-            </li>
-            <li onclick="app.exportToWord()" class="menu-item text-blue-300 hover:text-blue-200 bg-blue-900/30">
-                <i class="fas fa-file-word w-6 text-center"></i> تصدير إلى Word
-            </li>
-            <li onclick="app.addSection('HEADER')" class="menu-item text-white">
-                <i class="fas fa-file-signature w-6 text-center text-yellow-400"></i> تقرير مرور جديد
-            </li>
-
-            <div class="px-4 py-2 mt-4 mb-1 text-xs font-bold text-slate-500 uppercase tracking-wider">إضافة الأقسام للتقرير</div>
-            <li onclick="app.addSection('ER')" class="menu-item text-slate-300">
-                <i class="fas fa-truck-fast w-6 text-center text-red-400"></i> التقييم: الطوارئ
-            </li>
-            <li onclick="app.addSection('ICU')" class="menu-item text-slate-300">
-                <i class="fas fa-heart-pulse w-6 text-center text-rose-400"></i> التقييم: العناية المركزة
-            </li>
-            <li onclick="app.addSection('ICU_STATS')" class="menu-item text-slate-300">
-                <i class="fas fa-bed-pulse w-6 text-center text-purple-400"></i> إحصائية إشغال العنايات
-            </li>
-            <li onclick="app.addSection('OR')" class="menu-item text-slate-300">
-                <i class="fas fa-scalpel w-6 text-center text-green-400"></i> التقييم: العمليات
-            </li>
-            <li onclick="app.addSection('SURGERIES')" class="menu-item text-slate-300">
-                <i class="fas fa-list-check w-6 text-center text-teal-400"></i> لستة العمليات والمؤجلة
-            </li>
-            <li onclick="app.addSection('SERUM')" class="menu-item text-slate-300">
-                <i class="fas fa-syringe w-6 text-center text-cyan-400"></i> أرصدة الأمصال والسموم
-            </li>
-
-            <div class="px-4 py-2 mt-4 mb-1 text-xs font-bold text-slate-500 uppercase tracking-wider">النتائج والقرارات</div>
-            <li onclick="app.addSection('NOTES')" class="menu-item text-slate-300">
-                <i class="fas fa-clipboard-list w-6 text-center text-orange-400"></i> الملاحظات التصحيحية
-            </li>
-            <li onclick="app.addSection('FAULTS')" class="menu-item text-slate-300">
-                <i class="fas fa-triangle-exclamation w-6 text-center text-yellow-500"></i> الأعطال والنواقص
-            </li>
-            <li onclick="app.addSection('DECISION')" class="menu-item text-slate-300 border-b-0">
-                <i class="fas fa-gavel w-6 text-center text-indigo-400"></i> القرار التنفيذي والتوقيع
-            </li>
-        </div>
+    <!-- مساحة العمل الكاملة -->
+    <div class="flex flex-1 overflow-hidden relative w-full">
         
-        <div class="p-4 bg-slate-900 border-t border-slate-700 text-center text-xs text-slate-500">
-            النظام الميداني للإدارة المرئية
-        </div>
-    </aside>
+        <!-- خلفية داكنة عند فتح القائمة في الموبايل -->
+        <div id="sidebarOverlay" class="sidebar-overlay" onclick="app.toggleSidebar()"></div>
 
-    <!-- مساحة العمل الرئيسية -->
-    <main class="main-content flex-1 overflow-y-auto bg-slate-200 p-8">
-        <div id="editor" class="editor-container text-gray-800 text-lg leading-relaxed focus:outline-none" contenteditable="true" spellcheck="false">
-            <div class="text-center text-gray-400 mt-40 select-none placeholder-text" contenteditable="false">
-                <i class="fas fa-file-medical text-6xl mb-4 opacity-50"></i>
-                <h2 class="text-2xl font-bold">ورقة التقرير فارغة</h2>
-                <p class="mt-2 text-base">اضغط على "تقرير مرور جديد" من القائمة للبدء.</p>
+        <!-- القائمة الجانبية -->
+        <aside id="sidebar" class="sidebar flex-shrink-0 flex flex-col shadow-xl">
+            <div class="p-4 bg-slate-900 border-b border-slate-700 flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <i class="fas fa-truck-medical text-2xl text-blue-400"></i>
+                    <h1 class="font-bold text-lg leading-tight text-white">إدارة الرعاية الحرجة<br><span class="text-xs text-slate-400">نموذج المرور</span></h1>
+                </div>
+                <!-- زر إغلاق للموبايل -->
+                <button onclick="app.toggleSidebar()" class="md:hidden text-white text-2xl focus:outline-none">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
-        </div>
-    </main>
+
+            <div class="flex-1 overflow-y-auto py-2">
+                <div class="px-4 py-2 mt-2 mb-1 text-xs font-bold text-slate-500 uppercase tracking-wider">الإجراءات الأساسية</div>
+                <li onclick="window.print()" class="menu-item text-blue-300 hover:text-blue-200 bg-blue-900/30">
+                    <i class="fas fa-print w-6 text-center"></i> طباعة / حفظ PDF
+                </li>
+                <li onclick="app.exportToWord()" class="menu-item text-blue-300 hover:text-blue-200 bg-blue-900/30">
+                    <i class="fas fa-file-word w-6 text-center"></i> تصدير إلى Word
+                </li>
+                <li onclick="app.addSection('HEADER')" class="menu-item text-white">
+                    <i class="fas fa-file-signature w-6 text-center text-yellow-400"></i> تقرير مرور جديد
+                </li>
+
+                <div class="px-4 py-2 mt-4 mb-1 text-xs font-bold text-slate-500 uppercase tracking-wider">إضافة الأقسام للتقرير</div>
+                <li onclick="app.addSection('ER')" class="menu-item text-slate-300">
+                    <i class="fas fa-truck-fast w-6 text-center text-red-400"></i> التقييم: الطوارئ
+                </li>
+                <li onclick="app.addSection('ICU')" class="menu-item text-slate-300">
+                    <i class="fas fa-heart-pulse w-6 text-center text-rose-400"></i> التقييم: العناية المركزة
+                </li>
+                <li onclick="app.addSection('ICU_STATS')" class="menu-item text-slate-300">
+                    <i class="fas fa-bed-pulse w-6 text-center text-purple-400"></i> إحصائية إشغال العنايات
+                </li>
+                <li onclick="app.addSection('OR')" class="menu-item text-slate-300">
+                    <i class="fas fa-scalpel w-6 text-center text-green-400"></i> التقييم: العمليات
+                </li>
+                <li onclick="app.addSection('SURGERIES')" class="menu-item text-slate-300">
+                    <i class="fas fa-list-check w-6 text-center text-teal-400"></i> لستة العمليات والمؤجلة
+                </li>
+                <li onclick="app.addSection('SERUM')" class="menu-item text-slate-300">
+                    <i class="fas fa-syringe w-6 text-center text-cyan-400"></i> أرصدة الأمصال والسموم
+                </li>
+
+                <div class="px-4 py-2 mt-4 mb-1 text-xs font-bold text-slate-500 uppercase tracking-wider">النتائج والقرارات</div>
+                <li onclick="app.addSection('NOTES')" class="menu-item text-slate-300">
+                    <i class="fas fa-clipboard-list w-6 text-center text-orange-400"></i> الملاحظات التصحيحية
+                </li>
+                <li onclick="app.addSection('FAULTS')" class="menu-item text-slate-300">
+                    <i class="fas fa-triangle-exclamation w-6 text-center text-yellow-500"></i> الأعطال والنواقص
+                </li>
+                <li onclick="app.addSection('DECISION')" class="menu-item text-slate-300 border-b-0">
+                    <i class="fas fa-gavel w-6 text-center text-indigo-400"></i> القرار التنفيذي والتوقيع
+                </li>
+            </div>
+        </aside>
+
+        <!-- مساحة العمل الرئيسية -->
+        <main class="main-content flex-1 overflow-y-auto w-full p-2 md:p-8">
+            <div id="editor" class="editor-container text-gray-800 text-lg leading-relaxed focus:outline-none" contenteditable="true" spellcheck="false">
+                <div class="text-center text-gray-400 mt-20 md:mt-40 select-none placeholder-text" contenteditable="false">
+                    <i class="fas fa-file-medical text-6xl mb-4 opacity-50"></i>
+                    <h2 class="text-2xl font-bold">ورقة التقرير فارغة</h2>
+                    <p class="mt-2 text-base">اضغط على "تقرير مرور جديد" من القائمة للبدء.</p>
+                </div>
+            </div>
+        </main>
+    </div>
 
     <!-- إشعار منبثق -->
     <div id="toast" class="fixed bottom-5 left-1/2 transform -translate-x-1/2 bg-green-600 text-white px-6 py-3 rounded-full shadow-lg font-bold opacity-0 transition-opacity duration-300 pointer-events-none z-50">
@@ -187,6 +242,11 @@
         const app = {
             editor: document.getElementById('editor'),
             
+            toggleSidebar: function() {
+                document.getElementById('sidebar').classList.toggle('open');
+                document.getElementById('sidebarOverlay').classList.toggle('open');
+            },
+
             showToast: function(msg) {
                 const toast = document.getElementById('toast');
                 toast.innerText = msg;
@@ -200,27 +260,26 @@
                     this.showToast('التقرير فارغ! يرجى إضافة بيانات.');
                     return;
                 }
-                
-                // إعداد التنسيق ليناسب ملف الوورد
                 const header = `<html dir="rtl"><head><meta charset="utf-8"><style>body{font-family:Arial,sans-serif;} table{width:100%;border-collapse:collapse;} th,td{border:1px solid #000;padding:8px;text-align:right;} th{background:#eee;}</style></head><body>`;
                 const footer = `</body></html>`;
-                
                 let htmlContent = this.editor.innerHTML;
-                
-                // تنظيف الـ Checkboxes للوورد
                 htmlContent = htmlContent.replace(/<input[^>]*type="checkbox"[^>]*checked[^>]*>/gi, '☑');
                 htmlContent = htmlContent.replace(/<input[^>]*type="checkbox"[^>]*>/gi, '☐');
-                
                 const blob = new Blob(['\ufeff', header + htmlContent + footer], { type: 'application/msword' });
                 const link = document.createElement("a");
                 link.href = URL.createObjectURL(blob);
                 link.download = 'تقرير_مرور.doc';
                 link.click();
                 this.showToast('تم تصدير التقرير لـ Word');
+                
+                if (window.innerWidth <= 768) { this.toggleSidebar(); }
             },
 
             addSection: function(type) {
-                // إزالة النص الترحيبي عند أول إضافة
+                if (window.innerWidth <= 768) {
+                    this.toggleSidebar(); // إغلاق القائمة تلقائياً في الموبايل بعد اختيار قسم
+                }
+
                 const placeholder = document.querySelector('.placeholder-text');
                 if (placeholder) {
                     this.editor.innerHTML = '';
@@ -237,12 +296,10 @@
                             <h3 style="font-size: 16px; font-weight: bold; margin-bottom: 2px;">مديرية الشئون الصحية بالدقهلية</h3>
                             <h3 style="font-size: 16px; font-weight: bold; margin-bottom: 2px;">الإدارة العامة للطب العلاجي</h3>
                             <h3 style="font-size: 16px; font-weight: bold; margin-bottom: 15px;">إدارة الرعاية الحرجة والعاجلة</h3>
-                            
-                            <h1 style="font-size: 24px; font-weight: 800; color: #1e3a8a; border-bottom: 3px double #1e3a8a; display: inline-block; padding-bottom: 5px; margin-bottom: 20px;">
-                                نموذج المرور الميداني والتقرير التنفيذي لأقسام الرعاية الحرجة والعاجلة
+                            <h1 style="font-size: 20px; font-weight: 800; color: #1e3a8a; border-bottom: 3px double #1e3a8a; display: inline-block; padding-bottom: 5px; margin-bottom: 20px;">
+                                نموذج المرور الميداني لأقسام الرعاية الحرجة
                             </h1>
                         </div>
-                        
                         <h2 class="text-xl font-bold text-blue-800 mb-3 border-b-2 border-blue-200 pb-2 avoid-break" contenteditable="false">أولاً: بيانات المرور</h2>
                         <table class="avoid-break text-base">
                             <tbody>
@@ -254,7 +311,7 @@
                                     <td class="font-bold bg-slate-50 w-1/4">تاريخ المرور</td>
                                     <td class="w-1/4">${today}</td>
                                     <td class="font-bold bg-slate-50 w-1/4">وقت المرور</td>
-                                    <td class="w-1/4">..... : ..... ص/م</td>
+                                    <td class="w-1/4">..... : .....</td>
                                 </tr>
                                 <tr>
                                     <td class="font-bold bg-slate-50">نوع المرور</td>
@@ -268,10 +325,6 @@
                                     <td class="font-bold bg-slate-50">القائم بالمرور</td>
                                     <td colspan="3">د. ......................................</td>
                                 </tr>
-                                <tr>
-                                    <td class="font-bold bg-slate-50">الحضور من المستشفى</td>
-                                    <td colspan="3">......................................</td>
-                                </tr>
                             </tbody>
                         </table>
                     `;
@@ -280,14 +333,13 @@
                 
                 else if (type === 'ER') {
                     sectionHTML = `
-                        <h2 class="text-xl font-bold text-blue-800 mt-6 mb-3 border-b-2 border-blue-200 pb-2 avoid-break" contenteditable="false"><i class="fas fa-truck-fast"></i> التقييم السريع: قسم الطوارئ</h2>
-                        <div class="grid grid-cols-2 gap-2 mb-4 p-4 border border-gray-300 rounded bg-slate-50 text-base avoid-break">
+                        <h2 class="text-xl font-bold text-blue-800 mt-6 mb-3 border-b-2 border-blue-200 pb-2 avoid-break" contenteditable="false"><i class="fas fa-truck-fast"></i> التقييم السريع: الطوارئ</h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mb-4 p-4 border border-gray-300 rounded bg-slate-50 text-base avoid-break">
                             <label class="checkbox-group"><input type="checkbox"> الغرفة مفعلة وتعمل بكفاءة</label>
-                            <label class="checkbox-group"><input type="checkbox"> نظام رعايات مصر مفعل (Username & Password)</label>
-                            <label class="checkbox-group"><input type="checkbox"> توافر الإنترنت والكمبيوتر بالطوارئ</label>
-                            <label class="checkbox-group"><input type="checkbox"> عربة الطوارئ (Crash Cart) مستوفاة ومراجعة</label>
-                            <label class="checkbox-group"><input type="checkbox"> الشيتات والسجلات الطبية مستوفاة</label>
-                            <label class="checkbox-group"><input type="checkbox"> تواجد الأطباء والتمريض حسب النبطشية</label>
+                            <label class="checkbox-group"><input type="checkbox"> نظام رعايات مصر مفعل</label>
+                            <label class="checkbox-group"><input type="checkbox"> عربة الطوارئ مستوفاة ومراجعة</label>
+                            <label class="checkbox-group"><input type="checkbox"> الشيتات والسجلات مستوفاة</label>
+                            <label class="checkbox-group"><input type="checkbox"> تواجد الأطباء والتمريض</label>
                         </div>
                     `;
                     this.showToast('تم إدراج تقييم الطوارئ');
@@ -295,13 +347,12 @@
                 
                 else if (type === 'ICU') {
                     sectionHTML = `
-                        <h2 class="text-xl font-bold text-blue-800 mt-6 mb-3 border-b-2 border-blue-200 pb-2 avoid-break" contenteditable="false"><i class="fas fa-heart-pulse"></i> التقييم السريع: قسم العناية المركزة</h2>
-                        <div class="grid grid-cols-2 gap-2 mb-4 p-4 border border-gray-300 rounded bg-red-50 text-base avoid-break">
-                            <label class="checkbox-group"><input type="checkbox"> القوى البشرية (أطباء/تمريض) متواجدة</label>
-                            <label class="checkbox-group"><input type="checkbox"> الأجهزة الحيوية تعمل بكفاءة (مونيتور/فينت)</label>
-                            <label class="checkbox-group"><input type="checkbox"> الأدوية الحرجة متوفرة بالقسم</label>
-                            <label class="checkbox-group"><input type="checkbox"> المستلزمات الطبية متوفرة</label>
-                            <label class="checkbox-group"><input type="checkbox"> السجلات الطبية والتمريضية مستوفاة</label>
+                        <h2 class="text-xl font-bold text-blue-800 mt-6 mb-3 border-b-2 border-blue-200 pb-2 avoid-break" contenteditable="false"><i class="fas fa-heart-pulse"></i> التقييم السريع: العناية</h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mb-4 p-4 border border-gray-300 rounded bg-red-50 text-base avoid-break">
+                            <label class="checkbox-group"><input type="checkbox"> القوى البشرية متواجدة</label>
+                            <label class="checkbox-group"><input type="checkbox"> الأجهزة الحيوية تعمل بكفاءة</label>
+                            <label class="checkbox-group"><input type="checkbox"> الأدوية والمستلزمات متوفرة</label>
+                            <label class="checkbox-group"><input type="checkbox"> السجلات مستوفاة</label>
                             <label class="checkbox-group"><input type="checkbox"> تطبيق معايير مكافحة العدوى</label>
                         </div>
                     `;
@@ -310,23 +361,20 @@
 
                 else if (type === 'ICU_STATS') {
                     sectionHTML = `
-                        <h2 class="text-xl font-bold text-blue-800 mt-6 mb-3 border-b-2 border-blue-200 pb-2 avoid-break" contenteditable="false"><i class="fas fa-bed-pulse"></i> إحصائية إشغال العنايات</h2>
-                        <table class="text-base text-center avoid-break">
+                        <h2 class="text-xl font-bold text-blue-800 mt-6 mb-3 border-b-2 border-blue-200 pb-2 avoid-break" contenteditable="false"><i class="fas fa-bed-pulse"></i> إحصائية العنايات</h2>
+                        <table class="text-sm text-center avoid-break">
                             <thead class="bg-slate-100">
                                 <tr>
-                                    <th class="w-1/5">نوع العناية</th>
+                                    <th>نوع العناية</th>
                                     <th>الإجمالي</th>
                                     <th>المشغول</th>
                                     <th>الخالي</th>
-                                    <th>أجهزة تنفس متاحة</th>
-                                    <th>ملاحظات</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr><td class="font-bold text-right bg-slate-50">عناية باطنة</td><td></td><td></td><td></td><td></td><td></td></tr>
-                                <tr><td class="font-bold text-right bg-slate-50">عناية قلب (CCU)</td><td></td><td></td><td></td><td></td><td></td></tr>
-                                <tr><td class="font-bold text-right bg-slate-50">عناية جراحة</td><td></td><td></td><td></td><td></td><td></td></tr>
-                                <tr><td class="font-bold text-right bg-slate-50">عناية متوسطة</td><td></td><td></td><td></td><td></td><td></td></tr>
+                                <tr><td class="font-bold bg-slate-50">باطنة</td><td></td><td></td><td></td></tr>
+                                <tr><td class="font-bold bg-slate-50">قلب</td><td></td><td></td><td></td></tr>
+                                <tr><td class="font-bold bg-slate-50">جراحة</td><td></td><td></td><td></td></tr>
                             </tbody>
                         </table>
                     `;
@@ -335,13 +383,12 @@
                 
                 else if (type === 'OR') {
                     sectionHTML = `
-                        <h2 class="text-xl font-bold text-blue-800 mt-6 mb-3 border-b-2 border-blue-200 pb-2 avoid-break" contenteditable="false"><i class="fas fa-scalpel"></i> التقييم السريع: قسم العمليات</h2>
-                        <div class="grid grid-cols-2 gap-2 mb-4 p-4 border border-gray-300 rounded bg-green-50 text-base avoid-break">
+                        <h2 class="text-xl font-bold text-blue-800 mt-6 mb-3 border-b-2 border-blue-200 pb-2 avoid-break" contenteditable="false"><i class="fas fa-scalpel"></i> التقييم السريع: العمليات</h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mb-4 p-4 border border-gray-300 rounded bg-green-50 text-base avoid-break">
                             <label class="checkbox-group"><input type="checkbox"> غرف العمليات تعمل ومجهزة</label>
                             <label class="checkbox-group"><input type="checkbox"> جهاز التخدير يعمل ومُصان</label>
-                            <label class="checkbox-group"><input type="checkbox"> أجهزة الشفط المركزية/المتنقلة تعمل</label>
-                            <label class="checkbox-group"><input type="checkbox"> الأدوية والمستلزمات الجراحية متوفرة</label>
-                            <label class="checkbox-group"><input type="checkbox"> سجلات العمليات مستوفاة وموقعة</label>
+                            <label class="checkbox-group"><input type="checkbox"> الأدوية والمستلزمات متوفرة</label>
+                            <label class="checkbox-group"><input type="checkbox"> سجلات العمليات مستوفاة</label>
                         </div>
                     `;
                     this.showToast('تم إدراج تقييم العمليات');
@@ -351,29 +398,26 @@
                     sectionHTML = `
                         <div class="avoid-break">
                             <h2 class="text-xl font-bold text-blue-800 mt-6 mb-3 border-b-2 border-blue-200 pb-2" contenteditable="false"><i class="fas fa-list-check"></i> لستة العمليات والمؤجلة</h2>
-                            <div class="flex gap-4 mb-4 text-base">
-                                <div class="flex-1 border border-gray-300 p-3 bg-slate-50 rounded">
-                                    <span class="font-bold">إجمالي العمليات المجدولة (اللستة):</span> ................
+                            <div class="flex flex-col gap-2 mb-4 text-sm">
+                                <div class="border p-2 bg-slate-50 rounded">
+                                    <span class="font-bold">إجمالي العمليات المجدولة:</span> ......
                                 </div>
-                                <div class="flex-1 border border-gray-300 p-3 bg-slate-50 rounded">
-                                    <span class="font-bold">ما تم إنجازه حتى وقت المرور:</span> ................
+                                <div class="border p-2 bg-slate-50 rounded">
+                                    <span class="font-bold">ما تم إنجازه:</span> ......
                                 </div>
                             </div>
-                            <h3 class="font-bold text-red-700 text-lg mb-2" contenteditable="false">العمليات المؤجلة وأسبابها</h3>
+                            <h3 class="font-bold text-red-700 text-base mb-2" contenteditable="false">العمليات المؤجلة</h3>
                             <table class="text-sm text-center">
                                 <thead class="bg-slate-100">
                                     <tr>
-                                        <th class="w-12">م</th>
-                                        <th class="w-1/4">اسم المريض</th>
-                                        <th class="w-1/6">التخصص</th>
-                                        <th class="w-1/4">سبب التأجيل (عناية/دم/مستلزمات)</th>
-                                        <th>ملاحظات</th>
+                                        <th>المريض</th>
+                                        <th>التخصص</th>
+                                        <th>السبب</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr><td>1</td><td></td><td></td><td></td><td></td></tr>
-                                    <tr><td>2</td><td></td><td></td><td></td><td></td></tr>
-                                    <tr><td>3</td><td></td><td></td><td></td><td></td></tr>
+                                    <tr><td></td><td></td><td></td></tr>
+                                    <tr><td></td><td></td><td></td></tr>
                                 </tbody>
                             </table>
                         </div>
@@ -384,22 +428,19 @@
                 else if (type === 'SERUM') {
                     sectionHTML = `
                         <div class="avoid-break">
-                            <h2 class="text-xl font-bold text-blue-800 mt-6 mb-3 border-b-2 border-blue-200 pb-2" contenteditable="false"><i class="fas fa-syringe"></i> أرصدة الأمصال والسموم</h2>
-                            <table class="text-base text-center">
+                            <h2 class="text-xl font-bold text-blue-800 mt-6 mb-3 border-b-2 border-blue-200 pb-2" contenteditable="false"><i class="fas fa-syringe"></i> أرصدة الأمصال</h2>
+                            <table class="text-sm text-center">
                                 <thead class="bg-slate-100">
                                     <tr>
-                                        <th class="w-1/3 text-right">نوع المصل</th>
-                                        <th class="w-1/6">الرصيد الفعلي</th>
-                                        <th class="w-1/4">تاريخ الصلاحية</th>
-                                        <th>ملاحظات</th>
+                                        <th>نوع المصل</th>
+                                        <th>الرصيد الفعلي</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr><td class="font-bold text-right bg-slate-50">مصل التيتانوس (Tetanus)</td><td></td><td></td><td></td></tr>
-                                    <tr><td class="font-bold text-right bg-slate-50">مصل العقرب (Scorpion)</td><td></td><td></td><td></td></tr>
-                                    <tr><td class="font-bold text-right bg-slate-50">مصل الثعبان (Snake)</td><td></td><td></td><td></td></tr>
-                                    <tr><td class="font-bold text-right bg-slate-50">مصل الكلب (Rabies)</td><td></td><td></td><td></td></tr>
-                                    <tr><td class="font-bold text-right bg-slate-50">التسمم الممباري (Botulism)</td><td></td><td></td><td></td></tr>
+                                    <tr><td class="font-bold bg-slate-50">تيتانوس</td><td></td></tr>
+                                    <tr><td class="font-bold bg-slate-50">عقرب</td><td></td></tr>
+                                    <tr><td class="font-bold bg-slate-50">ثعبان</td><td></td></tr>
+                                    <tr><td class="font-bold bg-slate-50">كلب</td><td></td></tr>
                                 </tbody>
                             </table>
                         </div>
@@ -410,31 +451,20 @@
                 else if (type === 'NOTES') {
                     sectionHTML = `
                         <div class="avoid-break">
-                            <h2 class="text-xl font-bold text-blue-800 mt-8 mb-3 border-b-2 border-blue-200 pb-2" contenteditable="false">ملخص نتائج المرور والملاحظات</h2>
-                            <div class="flex gap-4 mb-4 text-base font-bold">
-                                <div class="flex-1 bg-red-100 text-red-800 p-2 border border-red-200 rounded text-center">🔴 ملاحظات حرجة: .....</div>
-                                <div class="flex-1 bg-orange-100 text-orange-800 p-2 border border-orange-200 rounded text-center">🟠 ملاحظات متوسطة: .....</div>
-                                <div class="flex-1 bg-green-100 text-green-800 p-2 border border-green-200 rounded text-center">🟢 ملاحظات بسيطة: .....</div>
-                            </div>
-                            <div class="mb-4 text-lg font-bold">درجة الالتزام العام: <span class="border-b-2 border-dashed border-gray-400 px-8"> / 100 </span></div>
-                            
-                            <h3 class="font-bold text-gray-800 mb-2 mt-4 text-lg" contenteditable="false">الملاحظات والإجراءات التصحيحية</h3>
+                            <h2 class="text-xl font-bold text-blue-800 mt-8 mb-3 border-b-2 border-blue-200 pb-2" contenteditable="false">ملخص الملاحظات</h2>
+                            <h3 class="font-bold text-gray-800 mb-2 mt-4 text-base" contenteditable="false">الملاحظات والإجراءات</h3>
                             <table class="text-sm text-center">
                                 <thead class="bg-slate-100">
                                     <tr>
-                                        <th class="w-10">م</th>
-                                        <th class="w-32">القسم</th>
                                         <th>الملاحظة</th>
-                                        <th class="w-16">الخطورة</th>
+                                        <th>الخطورة</th>
                                         <th>الإجراء المطلوب</th>
-                                        <th class="w-32">المسئول</th>
-                                        <th class="w-24">المهلة</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr><td>1</td><td></td><td></td><td class="text-lg">🔴</td><td></td><td></td><td></td></tr>
-                                    <tr><td>2</td><td></td><td></td><td class="text-lg">🟠</td><td></td><td></td><td></td></tr>
-                                    <tr><td>3</td><td></td><td></td><td class="text-lg">🟢</td><td></td><td></td><td></td></tr>
+                                    <tr><td></td><td class="text-lg">🔴</td><td></td></tr>
+                                    <tr><td></td><td class="text-lg">🟠</td><td></td></tr>
+                                    <tr><td></td><td class="text-lg">🟢</td><td></td></tr>
                                 </tbody>
                             </table>
                         </div>
@@ -445,42 +475,18 @@
                 else if (type === 'FAULTS') {
                     sectionHTML = `
                         <div class="avoid-break">
-                            <h2 class="text-xl font-bold text-blue-800 mt-6 mb-3 border-b-2 border-blue-200 pb-2" contenteditable="false">الأعطال الفنية والنواقص</h2>
-                            
-                            <h3 class="font-bold text-gray-800 mb-2 mt-4 text-lg" contenteditable="false">الأعطال الفنية بالأجهزة</h3>
+                            <h2 class="text-xl font-bold text-blue-800 mt-6 mb-3 border-b-2 border-blue-200 pb-2" contenteditable="false">الأعطال والنواقص</h2>
                             <table class="text-sm text-center mb-6">
                                 <thead class="bg-slate-100">
                                     <tr>
-                                        <th class="w-48">الجهاز</th>
-                                        <th class="w-32">القسم</th>
+                                        <th>الجهاز/القسم</th>
                                         <th>وصف العطل</th>
-                                        <th class="w-64">الإجراء المتخذ (بلاغ صيانة/تكهين)</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr><td></td><td></td><td></td><td></td></tr>
-                                    <tr><td></td><td></td><td></td><td></td></tr>
+                                    <tr><td></td><td></td></tr>
                                 </tbody>
                             </table>
-
-                            <div class="grid grid-cols-2 gap-8 text-base">
-                                <div>
-                                    <h3 class="font-bold text-red-700 mb-2 border-b border-red-200 pb-1"><i class="fas fa-pills"></i> نواقص الأدوية</h3>
-                                    <ul style="list-style-type: none; padding-right: 0;">
-                                        <li class="mb-2">- ................................................................</li>
-                                        <li class="mb-2">- ................................................................</li>
-                                        <li class="mb-2">- ................................................................</li>
-                                    </ul>
-                                </div>
-                                <div>
-                                    <h3 class="font-bold text-blue-700 mb-2 border-b border-blue-200 pb-1"><i class="fas fa-box-open"></i> نواقص المستلزمات</h3>
-                                    <ul style="list-style-type: none; padding-right: 0;">
-                                        <li class="mb-2">- ................................................................</li>
-                                        <li class="mb-2">- ................................................................</li>
-                                        <li class="mb-2">- ................................................................</li>
-                                    </ul>
-                                </div>
-                            </div>
                         </div>
                     `;
                     this.showToast('تم إدراج الأعطال والنواقص');
@@ -490,75 +496,31 @@
                     sectionHTML = `
                         <div class="avoid-break mt-8">
                             <h2 class="text-xl font-bold text-blue-800 mb-3 border-b-2 border-blue-200 pb-2" contenteditable="false">القرار التنفيذي</h2>
-                            <p class="font-bold mb-3 text-lg">خلصت لجنة المرور إلى أن مستوى جاهزية أقسام الرعاية الحرجة والعاجلة بالمستشفى:</p>
-                            <div class="flex gap-4 mb-4 text-base bg-slate-50 p-4 border border-slate-200 rounded">
+                            <p class="font-bold mb-3 text-base">مستوى الجاهزية:</p>
+                            <div class="flex flex-wrap gap-4 mb-4 text-sm bg-slate-50 p-4 border rounded">
                                 <label class="cursor-pointer"><input type="checkbox"> ممتاز</label>
-                                <label class="cursor-pointer"><input type="checkbox"> جيد جداً</label>
                                 <label class="cursor-pointer"><input type="checkbox"> جيد</label>
-                                <label class="cursor-pointer font-bold text-orange-600"><input type="checkbox"> يحتاج متابعة</label>
-                                <label class="cursor-pointer font-bold text-red-600"><input type="checkbox"> يحتاج تدخل عاجل</label>
+                                <label class="cursor-pointer text-orange-600"><input type="checkbox"> يحتاج متابعة</label>
+                                <label class="cursor-pointer text-red-600"><input type="checkbox"> تدخل عاجل</label>
                             </div>
-                            
-                            <p class="mb-4 text-base leading-relaxed">
-                                وقد تم التنبيه على إدارة المستشفى بسرعة تنفيذ الإجراءات التصحيحية الموضحة أعلاه خلال المدد المحددة، ويوصى بإعادة المرور للتأكد من إزالة السلبيات.
-                            </p>
-                            
-                            <div class="mb-8 font-bold text-lg">
-                                <span class="bg-yellow-100 p-2 rounded border border-yellow-300">موعد إعادة المرور المقترح: ........ / ........ / 202 م</span>
+                            <div class="grid grid-cols-2 gap-4 text-center mt-8 mb-8 text-sm">
+                                <div><p class="font-bold mb-2">مدير المستشفى</p><p>التوقيع: .........</p></div>
+                                <div><p class="font-bold mb-2">المفتش</p><p>التوقيع: .........</p></div>
                             </div>
-
-                            <div class="grid grid-cols-2 gap-4 text-center mt-12 mb-8">
-                                <div>
-                                    <p class="font-bold text-lg mb-2">مدير المستشفى</p>
-                                    <p class="mb-2">الاسم: .......................................</p>
-                                    <p>التوقيع: ....................................</p>
-                                </div>
-                                <div>
-                                    <p class="font-bold text-lg mb-2">القائم بالمرور (المفتش)</p>
-                                    <p class="mb-2">الاسم: .......................................</p>
-                                    <p>التوقيع: ....................................</p>
-                                </div>
-                            </div>
-                            
-                            <hr class="my-6 border-2 border-slate-800">
-                            
-                            <h3 class="font-bold text-gray-800 mb-3 text-lg text-center bg-slate-200 p-2" contenteditable="false">متابعة تنفيذ الإجراءات التصحيحية (يستكمل في زيارة إعادة المرور)</h3>
-                            <table class="text-sm text-center">
-                                <thead class="bg-slate-100">
-                                    <tr>
-                                        <th class="w-20">تم التنفيذ</th>
-                                        <th class="w-20">لم يتم</th>
-                                        <th>نسبة التنفيذ الإجمالية</th>
-                                        <th>تاريخ المتابعة</th>
-                                        <th>توقيع المتابع</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td><input type="checkbox" style="width: 20px; height: 20px;"></td>
-                                        <td><input type="checkbox" style="width: 20px; height: 20px;"></td>
-                                        <td class="font-bold text-lg">% ........</td>
-                                        <td>..... / ..... / 202 م</td>
-                                        <td></td>
-                                    </tr>
-                                </tbody>
-                            </table>
                         </div>
                     `;
                     this.showToast('تم إدراج القرار والتوقيعات');
                 }
 
-                // Add to editor
                 const tempDiv = document.createElement('div');
                 tempDiv.innerHTML = sectionHTML;
-                
-                // Insert at end
                 this.editor.appendChild(tempDiv);
-                
-                // Scroll to bottom
                 this.editor.lastElementChild.scrollIntoView({ behavior: 'smooth', block: 'end' });
             }
         };
+    </script>
+
+    <!-- كود تفعيل الأوفلاين -->
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
