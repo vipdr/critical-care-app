@@ -118,11 +118,10 @@
         }
 
         @media print {
-            body {
-                background-color: white !important;
-                display: block !important;
+            html, body {
                 height: auto !important;
                 overflow: visible !important;
+                background: white !important;
                 direction: rtl !important;
             }
             .sidebar, .mobile-header {
@@ -131,10 +130,10 @@
             .main-content {
                 display: block !important;
                 position: static !important;
-                padding: 0 !important;
-                margin: 0 !important;
                 height: auto !important;
                 overflow: visible !important;
+                padding: 0 !important;
+                margin: 0 !important;
             }
             .editor-container {
                 box-shadow: none !important;
@@ -149,15 +148,20 @@
             table {
                 width: 100% !important;
                 direction: rtl !important;
+                page-break-inside: auto;
             }
             th, td {
                 text-align: right !important;
+            }
+            tr {
+                page-break-inside: avoid;
+                page-break-after: auto;
             }
             h2, h3 {
                 page-break-after: avoid;
                 text-align: right !important;
             }
-            table, .avoid-break {
+            .avoid-break {
                 page-break-inside: avoid;
             }
         }
@@ -191,7 +195,7 @@
 
             <div class="flex-1 overflow-y-auto py-2">
                 <div class="px-4 py-2 mt-2 mb-1 text-xs font-bold text-slate-500 uppercase tracking-wider">الإجراءات الأساسية</div>
-                <li onclick="window.print()" class="menu-item text-blue-300 hover:text-blue-200 bg-blue-900/30">
+                <li onclick="app.printReport()" class="menu-item text-blue-300 hover:text-blue-200 bg-blue-900/30">
                     <i class="fas fa-print w-6 text-center"></i> طباعة / حفظ PDF
                 </li>
                 <li onclick="app.exportToWord()" class="menu-item text-blue-300 hover:text-blue-200 bg-blue-900/30">
@@ -267,6 +271,15 @@
                 toast.innerText = msg;
                 toast.style.opacity = '1';
                 setTimeout(() => toast.style.opacity = '0', 2000);
+            },
+
+            printReport: function() {
+                const placeholder = document.querySelector('.placeholder-text');
+                if (placeholder) {
+                    this.showToast('التقرير فارغ! يرجى إضافة بيانات.');
+                    return;
+                }
+                window.print();
             },
 
             exportToWord: function() {
