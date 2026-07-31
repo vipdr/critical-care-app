@@ -119,25 +119,30 @@
 
         @media print {
             body {
-                background-color: white;
-                display: block;
+                background-color: white !important;
+                display: block !important;
+                height: auto !important;
+                overflow: visible !important;
                 direction: rtl !important;
             }
             .sidebar, .mobile-header {
                 display: none !important;
             }
             .main-content {
+                display: block !important;
+                position: static !important;
                 padding: 0 !important;
                 margin: 0 !important;
                 height: auto !important;
                 overflow: visible !important;
             }
             .editor-container {
-                box-shadow: none;
-                margin: 0;
-                padding: 1.5cm;
-                max-width: 100%;
-                min-height: auto;
+                box-shadow: none !important;
+                margin: 0 auto !important;
+                padding: 1cm !important;
+                max-width: 100% !important;
+                height: auto !important;
+                min-height: auto !important;
                 direction: rtl !important;
                 text-align: right !important;
             }
