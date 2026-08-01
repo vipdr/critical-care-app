@@ -5,44 +5,47 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>نظام إدارة تقارير الرعاية الحرجة</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body { font-family: 'Cairo', sans-serif; background: #f1f5f9; }
-        .sidebar { width: 280px; background: #0f172a; height: 100vh; position: fixed; right: -280px; transition: 0.3s; z-index: 50; padding-top: 80px; }
+        .sidebar { width: 280px; background: #0f172a; height: 100vh; position: fixed; right: -280px; transition: 0.3s; z-index: 50; padding-top: 20px; }
         .sidebar.open { right: 0; }
         .sidebar-overlay { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index: 40; }
         .sidebar-overlay.open { display: block; }
         .editor { background: white; max-width: 21cm; min-height: 29.7cm; margin: 80px auto 20px; padding: 2cm; box-shadow: 0 4px 12px rgba(0,0,0,0.1); outline: none; }
         @media print { 
             html, body { height: auto !important; overflow: visible !important; background: white !important; }
-            .no-print { display: none !important; } 
             .sidebar, .sidebar-overlay, .menu-btn { display: none !important; } 
             .editor { box-shadow: none !important; margin: 0 auto !important; padding: 1cm !important; width: 100% !important; }
-            table { page-break-inside: auto; }
-            tr { page-break-inside: avoid; }
         }
     </style>
 </head>
 <body>
 
-    <div id="overlay" class="sidebar-overlay" onclick="toggleSidebar()"></div>
+    <div id="overlay" class="sidebar-overlay" onclick="app.toggleSidebar()"></div>
 
-    <button onclick="toggleSidebar()" class="menu-btn fixed top-4 right-4 z-40 bg-blue-800 text-white p-3 rounded-full shadow-lg">
+    <button onclick="app.toggleSidebar()" class="menu-btn fixed top-4 right-4 z-40 bg-blue-800 text-white p-3 rounded-full shadow-lg">
         <i class="fas fa-bars"></i>
     </button>
 
     <div id="sidebar" class="sidebar p-4 text-white overflow-y-auto">
-        <h2 class="text-xl font-bold mb-6 text-blue-400 border-b pb-2">القائمة</h2>
+        <!-- الأيقونة القديمة -->
+        <div class="text-center mb-6 border-b border-slate-700 pb-4">
+            <i class="fas fa-truck-medical text-4xl text-blue-400 mb-2"></i>
+            <h1 class="font-bold text-lg">إدارة الرعاية الحرجة</h1>
+            <p class="text-xs text-slate-400">نموذج المرور الميداني</p>
+        </div>
+        
         <div class="space-y-2">
-            <button onclick="addSection('HEADER')" class="w-full text-right p-3 bg-slate-700 rounded hover:bg-slate-600">ترويسة التقرير</button>
-            <button onclick="addSection('ER')" class="w-full text-right p-3 bg-slate-700 rounded hover:bg-slate-600">قسم الطوارئ</button>
-            <button onclick="addSection('ICU')" class="w-full text-right p-3 bg-slate-700 rounded hover:bg-slate-600">قسم العناية المركزة</button>
-            <button onclick="addSection('SURGERIES')" class="w-full text-right p-3 bg-slate-700 rounded hover:bg-slate-600">لستة العمليات</button>
-            <button onclick="addSection('SERUM')" class="w-full text-right p-3 bg-slate-700 rounded hover:bg-slate-600">أرصدة الأمصال</button>
-            <button onclick="addSection('NOTES')" class="w-full text-right p-3 bg-slate-700 rounded hover:bg-slate-600">الملاحظات التصحيحية</button>
+            <button onclick="app.addSection('HEADER')" class="w-full text-right p-3 bg-slate-700 rounded hover:bg-slate-600">ترويسة التقرير</button>
+            <button onclick="app.addSection('ER')" class="w-full text-right p-3 bg-slate-700 rounded hover:bg-slate-600">قسم الطوارئ</button>
+            <button onclick="app.addSection('ICU')" class="w-full text-right p-3 bg-slate-700 rounded hover:bg-slate-600">قسم العناية</button>
+            <button onclick="document.getElementById('imgInput').click()" class="w-full text-right p-3 bg-teal-800 rounded hover:bg-teal-700">
+                <i class="fas fa-camera ml-2"></i> إدراج صور توثيقية
+            </button>
+            <input type="file" id="imgInput" class="hidden" accept="image/*" onchange="app.insertImage(this)">
             <button onclick="window.print()" class="w-full text-right p-3 bg-green-600 rounded mt-4 font-bold">طباعة / PDF</button>
-            <button onclick="location.reload()" class="w-full text-right p-3 bg-red-600 rounded font-bold">مسح الكل</button>
         </div>
     </div>
 
@@ -51,31 +54,35 @@
     </div>
 
     <script>
-        function toggleSidebar() { 
-            document.getElementById('sidebar').classList.toggle('open');
-            document.getElementById('overlay').classList.toggle('open');
-        }
+        const app = {
+            toggleSidebar: function() { 
+                document.getElementById('sidebar').classList.toggle('open');
+                document.getElementById('overlay').classList.toggle('open');
+            },
+            
+            insertImage: function(input) {
+                if (input.files && input.files[0]) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const imgHtml = `<div class="my-4 text-center"><img src="${e.target.result}" style="max-width: 100%; height: auto; border: 2px solid #e2e8f0; border-radius: 8px;" /></div>`;
+                        document.getElementById('editor').insertAdjacentHTML('beforeend', imgHtml);
+                    };
+                    reader.readAsDataURL(input.files[0]);
+                    this.toggleSidebar();
+                }
+            },
 
-        function addSection(type) {
-            if (document.querySelector('.placeholder')) document.getElementById('editor').innerHTML = '';
-            let html = '';
-            if(type === 'HEADER') html = `
-                <div class="text-center mb-8 border-b-2 pb-4">
-                    <h1 class="text-2xl font-bold">نموذج المرور الميداني للرعاية الحرجة</h1>
-                    <p class="mt-2 text-sm text-gray-600">تاريخ المرور: ${new Date().toLocaleDateString('ar-EG')}</p>
-                    <div class="mt-4 p-2 bg-blue-50 border border-blue-200 rounded text-blue-900 font-bold inline-block px-6">
-                        القائم بالمرور: د. مجدي محمد سعد
-                    </div>
-                </div>`;
-            else if(type === 'ER') html = `<div class="mb-6 p-4 border rounded shadow-sm"><h3>قسم الطوارئ</h3><div class="grid grid-cols-2 gap-2 mt-2 text-sm"><label><input type="checkbox"> الغرفة مفعلة</label><label><input type="checkbox"> توافر الأدوية</label></div></div>`;
-            else if(type === 'ICU') html = `<div class="mb-6 p-4 border rounded shadow-sm"><h3>العناية المركزة</h3><div class="grid grid-cols-2 gap-2 mt-2 text-sm"><label><input type="checkbox"> الأجهزة تعمل</label><label><input type="checkbox"> توافر التمريض</label></div></div>`;
-            else if(type === 'SURGERIES') html = `<div class="mb-6 p-4 border rounded shadow-sm"><h3>لستة العمليات</h3><table class="w-full border mt-2 text-sm"><tr><th class="border p-2">م</th><th class="border p-2">اسم المريض</th><th class="border p-2">التخصص</th></tr><tr><td class="border p-2">1</td><td class="border p-2">...</td><td class="border p-2">...</td></tr></table></div>`;
-            else if(type === 'SERUM') html = `<div class="mb-6 p-4 border rounded shadow-sm"><h3>أرصدة الأمصال</h3><table class="w-full border mt-2 text-sm"><tr><th class="border p-2">النوع</th><th class="border p-2">الرصيد</th></tr><tr><td class="border p-2">تيتانوس</td><td class="border p-2">...</td></tr></table></div>`;
-            else if(type === 'NOTES') html = `<div class="mb-6 p-4 border rounded shadow-sm"><h3>الملاحظات التصحيحية</h3><textarea class="w-full h-20 border p-2 mt-2 text-sm" placeholder="اكتب الملاحظات هنا..."></textarea></div>`;
-
-            document.getElementById('editor').insertAdjacentHTML('beforeend', html);
-            toggleSidebar();
-        }
+            addSection: function(type) {
+                if (document.querySelector('.placeholder')) document.getElementById('editor').innerHTML = '';
+                let html = '';
+                if(type === 'HEADER') html = `<div class="text-center mb-8 border-b-2 pb-4"><h1 class="text-2xl font-bold">نموذج المرور الميداني للرعاية الحرجة</h1><p class="text-sm mt-1">التاريخ: ${new Date().toLocaleDateString('ar-EG')}</p><div class="mt-4 p-2 bg-blue-50 text-blue-900 font-bold inline-block px-6 rounded border border-blue-100">القائم بالمرور: د. مجدي محمد سعد</div></div>`;
+                else if(type === 'ER') html = `<div class="mb-6 p-4 border rounded shadow-sm"><h3>قسم الطوارئ</h3><div class="grid grid-cols-2 gap-2 mt-2 text-sm"><label><input type="checkbox" class="ml-2"> الغرفة مفعلة</label><label><input type="checkbox" class="ml-2"> توافر الأدوية</label></div></div>`;
+                else if(type === 'ICU') html = `<div class="mb-6 p-4 border rounded shadow-sm"><h3>العناية المركزة</h3><div class="grid grid-cols-2 gap-2 mt-2 text-sm"><label><input type="checkbox" class="ml-2"> الأجهزة تعمل</label><label><input type="checkbox" class="ml-2"> توافر التمريض</label></div></div>`;
+                
+                document.getElementById('editor').insertAdjacentHTML('beforeend', html);
+                this.toggleSidebar();
+            }
+        };
 
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('./sw.js').catch(err => console.log('Offline support disabled'));
