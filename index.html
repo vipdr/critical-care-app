@@ -3,89 +3,87 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نظام إدارة تقارير الرعاية الحرجة</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+    <title>نظام تقارير مرور الرعاية الحرجة والعاجلة</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { font-family: 'Cairo', sans-serif; background: #f1f5f9; }
-        .sidebar { width: 280px; background: #0f172a; height: 100vh; position: fixed; right: -280px; transition: 0.3s; z-index: 50; padding-top: 20px; }
-        .sidebar.open { right: 0; }
-        .sidebar-overlay { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index: 40; }
-        .sidebar-overlay.open { display: block; }
-        .editor { background: white; max-width: 21cm; min-height: 29.7cm; margin: 80px auto 20px; padding: 2cm; box-shadow: 0 4px 12px rgba(0,0,0,0.1); outline: none; }
-        @media print { 
-            html, body { height: auto !important; overflow: visible !important; background: white !important; }
-            .sidebar, .sidebar-overlay, .menu-btn { display: none !important; } 
-            .editor { box-shadow: none !important; margin: 0 auto !important; padding: 1cm !important; width: 100% !important; }
+        :root { --navy:#0F3B3A; --gold:#B9863E; --paper:#F6F4EC; }
+        body { font-family: 'Tajawal', sans-serif; background: var(--paper); margin: 0; }
+        
+        /* القائمة الجانبية */
+        #sidebar { 
+            width: 280px; background: var(--navy); color: #fff; height: 100vh; 
+            position: fixed; right: -280px; transition: 0.3s; z-index: 100; padding: 20px;
         }
+        #sidebar.active { right: 0; }
+        
+        /* زر القائمة الثابت (هذا هو التعديل) */
+        .menu-btn { 
+            position: fixed; top: 20px; right: 20px; z-index: 101; 
+            background: var(--navy); color: white; padding: 12px 18px; 
+            border-radius: 50px; shadow: 0 4px 6px rgba(0,0,0,0.2);
+        }
+
+        .main-content { padding: 20px; min-height: 100vh; }
+        .editor { background: white; max-width: 21cm; min-height: 29.7cm; margin: 60px auto 20px; padding: 2cm; box-shadow: 0 2px 10px rgba(0,0,0,0.1); outline: none; }
+        
+        @media print { .no-print { display: none !important; } .editor { box-shadow: none; padding: 1cm; margin: 0; } }
     </style>
 </head>
 <body>
 
-    <div id="overlay" class="sidebar-overlay" onclick="app.toggleSidebar()"></div>
-
-    <button onclick="app.toggleSidebar()" class="menu-btn fixed top-4 right-4 z-40 bg-blue-800 text-white p-3 rounded-full shadow-lg">
-        <i class="fas fa-bars"></i>
+    <!-- زر القائمة الثابت -->
+    <button class="menu-btn no-print" onclick="toggleSidebar()">
+        <i class="fas fa-bars"></i> القائمة
     </button>
 
-    <div id="sidebar" class="sidebar p-4 text-white overflow-y-auto">
-        <!-- الأيقونة القديمة -->
-        <div class="text-center mb-6 border-b border-slate-700 pb-4">
-            <i class="fas fa-truck-medical text-4xl text-blue-400 mb-2"></i>
-            <h1 class="font-bold text-lg">إدارة الرعاية الحرجة</h1>
-            <p class="text-xs text-slate-400">نموذج المرور الميداني</p>
+    <div id="sidebar">
+        <div class="text-center mb-6">
+            <i class="fas fa-truck-medical text-4xl text-amber-500"></i>
+            <h1 class="font-bold mt-2">إدارة الرعاية الحرجة</h1>
         </div>
-        
         <div class="space-y-2">
-            <button onclick="app.addSection('HEADER')" class="w-full text-right p-3 bg-slate-700 rounded hover:bg-slate-600">ترويسة التقرير</button>
-            <button onclick="app.addSection('ER')" class="w-full text-right p-3 bg-slate-700 rounded hover:bg-slate-600">قسم الطوارئ</button>
-            <button onclick="app.addSection('ICU')" class="w-full text-right p-3 bg-slate-700 rounded hover:bg-slate-600">قسم العناية</button>
-            <button onclick="document.getElementById('imgInput').click()" class="w-full text-right p-3 bg-teal-800 rounded hover:bg-teal-700">
-                <i class="fas fa-camera ml-2"></i> إدراج صور توثيقية
-            </button>
-            <input type="file" id="imgInput" class="hidden" accept="image/*" onchange="app.insertImage(this)">
-            <button onclick="window.print()" class="w-full text-right p-3 bg-green-600 rounded mt-4 font-bold">طباعة / PDF</button>
+            <button onclick="addSection('HEADER')" class="w-full text-right p-3 hover:bg-[#1a4a49] rounded">ترويسة التقرير</button>
+            <button onclick="addSection('ER')" class="w-full text-right p-3 hover:bg-[#1a4a49] rounded">قسم الطوارئ</button>
+            <button onclick="addSection('ICU')" class="w-full text-right p-3 hover:bg-[#1a4a49] rounded">قسم العناية</button>
+            <button onclick="document.getElementById('imgInput').click()" class="w-full text-right p-3 bg-teal-800 rounded font-bold">إدراج صور توثيقية</button>
+            <input type="file" id="imgInput" class="hidden" accept="image/*" onchange="insertImage(this)">
+            <button onclick="window.print()" class="w-full text-right p-3 bg-green-700 rounded font-bold mt-4">طباعة / PDF</button>
         </div>
     </div>
 
-    <div id="editor" class="editor" contenteditable="true">
-        <div class="text-center text-slate-400 p-20 placeholder">اضغط على القائمة لإضافة الأقسام...</div>
-    </div>
+    <main class="main-content">
+        <div id="editor" class="editor" contenteditable="true">
+            <div class="text-center mb-8 border-b-2 pb-4">
+                <h1 class="text-2xl font-bold">نموذج المرور الميداني للرعاية الحرجة</h1>
+                <p>تاريخ المرور: ${new Date().toLocaleDateString('ar-EG')}</p>
+                <div class="mt-4 p-2 bg-blue-50 text-blue-900 font-bold inline-block px-6 rounded">القائم بالمرور: د. مجدي محمد سعد</div>
+            </div>
+        </div>
+    </main>
 
     <script>
-        const app = {
-            toggleSidebar: function() { 
-                document.getElementById('sidebar').classList.toggle('open');
-                document.getElementById('overlay').classList.toggle('open');
-            },
-            
-            insertImage: function(input) {
-                if (input.files && input.files[0]) {
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        const imgHtml = `<div class="my-4 text-center"><img src="${e.target.result}" style="max-width: 100%; height: auto; border: 2px solid #e2e8f0; border-radius: 8px;" /></div>`;
-                        document.getElementById('editor').insertAdjacentHTML('beforeend', imgHtml);
-                    };
-                    reader.readAsDataURL(input.files[0]);
-                    this.toggleSidebar();
-                }
-            },
+        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('active'); }
 
-            addSection: function(type) {
-                if (document.querySelector('.placeholder')) document.getElementById('editor').innerHTML = '';
-                let html = '';
-                if(type === 'HEADER') html = `<div class="text-center mb-8 border-b-2 pb-4"><h1 class="text-2xl font-bold">نموذج المرور الميداني للرعاية الحرجة</h1><p class="text-sm mt-1">التاريخ: ${new Date().toLocaleDateString('ar-EG')}</p><div class="mt-4 p-2 bg-blue-50 text-blue-900 font-bold inline-block px-6 rounded border border-blue-100">القائم بالمرور: د. مجدي محمد سعد</div></div>`;
-                else if(type === 'ER') html = `<div class="mb-6 p-4 border rounded shadow-sm"><h3>قسم الطوارئ</h3><div class="grid grid-cols-2 gap-2 mt-2 text-sm"><label><input type="checkbox" class="ml-2"> الغرفة مفعلة</label><label><input type="checkbox" class="ml-2"> توافر الأدوية</label></div></div>`;
-                else if(type === 'ICU') html = `<div class="mb-6 p-4 border rounded shadow-sm"><h3>العناية المركزة</h3><div class="grid grid-cols-2 gap-2 mt-2 text-sm"><label><input type="checkbox" class="ml-2"> الأجهزة تعمل</label><label><input type="checkbox" class="ml-2"> توافر التمريض</label></div></div>`;
-                
-                document.getElementById('editor').insertAdjacentHTML('beforeend', html);
-                this.toggleSidebar();
+        function addSection(type) {
+            let html = '';
+            if(type === 'HEADER') html = `<div class="text-center mb-8 border-b-2 pb-4"><h1 class="text-2xl font-bold">نموذج المرور الميداني</h1><div class="mt-4 p-2 bg-blue-50 font-bold inline-block px-6 rounded">القائم بالمرور: د. مجدي محمد سعد</div></div>`;
+            else if(type === 'ER') html = `<div class="mb-6 p-4 border rounded"><h3>قسم الطوارئ</h3><div class="grid grid-cols-2 gap-2 mt-2"><label><input type="checkbox"> الغرفة مفعلة</label></div></div>`;
+            else if(type === 'ICU') html = `<div class="mb-6 p-4 border rounded"><h3>العناية المركزة</h3><div class="grid grid-cols-2 gap-2 mt-2"><label><input type="checkbox"> الأجهزة تعمل</label></div></div>`;
+            document.getElementById('editor').insertAdjacentHTML('beforeend', html);
+            toggleSidebar(); // غلق القائمة بعد الإضافة
+        }
+
+        function insertImage(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    document.getElementById('editor').insertAdjacentHTML('beforeend', `<div class="my-4"><img src="${e.target.result}" style="max-width: 100%;" /></div>`);
+                };
+                reader.readAsDataURL(input.files[0]);
+                toggleSidebar();
             }
-        };
-
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('./sw.js').catch(err => console.log('Offline support disabled'));
         }
     </script>
 </body>
