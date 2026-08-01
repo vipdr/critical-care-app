@@ -40,6 +40,14 @@
             background-color: #334155;
         }
 
+        .mobile-header {
+            position: fixed !important;
+            top: 0;
+            right: 0;
+            left: 0;
+            z-index: 1000 !important;
+        }
+
         .editor-container {
             background-color: white;
             width: 100%;
@@ -93,6 +101,7 @@
                 right: -300px;
                 z-index: 50;
                 box-shadow: -5px 0 15px rgba(0,0,0,0.5);
+                padding-top: 60px;
             }
             .sidebar.open {
                 right: 0;
@@ -109,6 +118,9 @@
             }
             .sidebar-overlay.open {
                 display: block;
+            }
+            .main-content {
+                padding-top: 80px !important;
             }
             .editor-container {
                 padding: 15px;
@@ -169,7 +181,7 @@
 </head>
 <body class="flex flex-col md:flex-row h-screen overflow-hidden bg-slate-200">
 
-    <div class="mobile-header md:hidden bg-slate-900 text-white p-4 flex justify-between items-center shadow-md z-10 w-full flex-shrink-0">
+    <div class="mobile-header md:hidden bg-slate-900 text-white p-4 flex justify-between items-center shadow-md w-full flex-shrink-0">
         <div class="flex items-center gap-3">
             <i class="fas fa-truck-medical text-xl text-blue-400"></i>
             <h1 class="font-bold text-lg">نظام الرعاية الحرجة</h1>
